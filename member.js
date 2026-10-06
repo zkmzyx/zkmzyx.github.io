@@ -46,7 +46,7 @@ function renderAccount(){
  for(const i of management?.invitations||[]){const state=i.consumed_at!==null?'accepted':i.revoked_at!==null?'revoked':i.expires_at<=Date.now()?'expired':'pending';const p=management.canonicalPeople.find(p=>p.id===i.person_id);const {r,heading}=row($('invite-list'),(p?.name||t('people'))+' · '+t(i.intent),t('signInEmail')+': '+i.email+' · '+t('expires',{date:date(i.expires_at)}));badge(heading,state,state==='pending'?'pending':'');if(state==='pending')action(r,'revokeInvitation',async()=>{if(!await dialog('revokeInvitation','revokeInviteHelp'))return;await api('invite-revoke',{id:i.id});hideLink();await refresh();},true);}
 }
 async function refresh(){const me=await api('me',null,'GET');csrf=me.csrf;person=me;if(inviteMode){invitation=null;location.replace('/');return;}$('welcome').hidden=true;$('account').hidden=false;keys=await api('credentials',null,'GET');management=me.role==='owner'?await api('management',null,'GET'):null;applyLanguage(me.language);say('');}
-function signedOut(){csrf=null;person=null;management=null;keys=[];personRequest=null;hideLink();clearPending();$('account').hidden=true;$('welcome').hidden=false;$('keys').replaceChildren();$('invite-list').replaceChildren();$('people-list').replaceChildren();$('identity').textContent='';$('identifier').value='';say('signedOut');}
+function signedOut(){csrf=null;person=null;management=null;keys=[];personRequest=null;hideLink();clearPending();$('account').hidden=true;$('welcome').hidden=false;$('keys').replaceChildren();$('invite-list').replaceChildren();$('people-list').replaceChildren();$('identity').textContent='';$('identifier').value='';$('person').replaceChildren();$('person-name').value='';$('add-person-fields').hidden=true;$('people-section').hidden=true;$('invitations').hidden=true;say('signedOut');}
 function back(){const target=params.get('from'),fallback=sections.has(target)?'/#'+target:'/';try{const entries=window.navigation?.entries(),at=window.navigation?.currentEntry?.index,previous=entries?.find(e=>e.index===at-1),u=previous?.url?new URL(previous.url):null;if(u?.origin===frontendOrigin&&u.pathname==='/'){history.back();return;}}catch{}location.assign(fallback);}
 window.addEventListener('message',event=>{if(event.origin===frontendOrigin&&event.source===popup&&event.data?.type==='zkmzyx-browser-check')waiter?.();});
 async function prepare(purpose){
@@ -69,4 +69,4 @@ else{
  }
 }
 window.addEventListener('pageshow',e=>{if(e.persisted&&!inviteMode)run(refresh);});
-window.addEventListener('pagehide',()=>{invitation=null;csrf=null;person=null;management=null;keys=[];inviteInfo=null;hideLink();clearPending();});
+window.addEventListener('pagehide',()=>{invitation=null;inviteInfo=null;if(!inviteMode)signedOut();else{csrf=null;inviteValid=false;$('invited-identity').textContent='';hideLink();clearPending();}});
