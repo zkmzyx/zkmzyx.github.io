@@ -83,4 +83,4 @@ export async function initOwnerSetup(doc=document,win=window) {
   win.addEventListener('pagehide',()=>{nativeController?.abort();csrf=null;resetCeremony();});
   render();say('No ceremony starts automatically. Begin with the private session check.');
 }
-if(typeof document!=='undefined')initOwnerSetup();
+if(typeof document!=='undefined'&&document.querySelector('#prepare-owner'))initOwnerSetup();
